@@ -1,92 +1,98 @@
+const userScore = document.querySelector(".yourScore");
+const pcScore = document.querySelector(".pcScore");
+const btns = document.querySelectorAll("button");
+const results = document.querySelectorAll(".results h1");
+
+btns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        nextRound(btn.className[0].toUpperCase());
+    });
+});
 
 let score = {
     user: 0,
     pc: 0,
-    scoreBoard: () => {
-        console.log("-----Scoreboard-----")
-        console.log(`You: ${score.user}`)
-        console.log(`Computer: ${score.pc}`)
-    }
-}
+};
 
 let choice = {
     user: "",
-    pc: ""
+    pc: "",
+};
+
+function letterToName(letter) {
+    const name =
+        letter === "R" ? "Rock" : letter === "P" ? "Paper" : "Scissors";
+    return name;
 }
 
 let result = {
     tie: () => {
-        console.log("It's a tie!")
+        results[2].textContent = "It's a tie!";
+        results[1].textContent = `You and the computer choosed ${letterToName(
+            choice.user
+        )}`;
     },
     playerWon: () => {
-        console.log(`${choice.user === "R" ? "Rock" : choice.user === "P" ? "Paper" : "Scissors"} beats ${choice.pc === "R" ? "Rock" : choice.pc === "P" ? "Paper" : "Scissors"}`);
-        console.log("You won this round!")
-        score.user++
+        results[2].textContent = "You Won!";
+        results[1].textContent = `${letterToName(
+            choice.user
+        )} beats ${letterToName(choice.pc)}`;
+        score.user++;
     },
     playerLost: () => {
-        console.log(`${choice.pc === "R" ? "Rock" : choice.pc === "P" ? "Paper" : "Scissors"} beats ${choice.user === "R" ? "Rock" : choice.user === "P" ? "Paper" : "Scissors"}`);
-        console.log("You lost this round!")
-        score.pc++
-    }
+        results[2].textContent = "You Lost!";
+        results[1].textContent = `${letterToName(
+            choice.pc
+        )} beats ${letterToName(choice.user)}`;
+        score.pc++;
+    },
+};
+
+function computerChoice() {
+    const calc = Math.floor(Math.random() * 3);
+    choice.pc = calc === 0 ? "R" : calc === 1 ? "P" : "S";
+    results[0].textContent = `The computer choosed ${letterToName(choice.pc)}`;
 }
 
-const askPlayerChoice = () => {
-    return prompt("What is your choice? (R)ock / (P)aper / (S)cissors").
-    trim().
-    toUpperCase()}
-
-function userChoice(){
-    choice.user = askPlayerChoice()
-    while(choice.user !== "R" && choice.user !== "P" && choice.user !== "S"){
-        cont++
-        if (cont === 5){
-            break
-        }
-        alert("Please enter a valid value")
-        choice.user = askPlayerChoice()
-    }
-    console.log(`Your choice: ${choice.user}`)
-}
-
-function computerChoice(){
-    const calc = Math.floor(Math.random() * 3)
-    choice.pc = (calc === 0 ? "R" : calc === 1 ? "P" : "S")
-    console.log(`Computer choice: ${choice.pc}`)
-}
-
-function comparation({user, pc}){
-    if( user === pc ){
-        result.tie()
-    }
-    else if(
-        user === "R" && pc === "S" || 
-        user === "S" && pc === "P" ||
-        user === "P" && pc === "R"
-    ){
-        result.playerWon()
-    }else{
-        result.playerLost()
-    }
-    score.scoreBoard()
-    choice.user = null
-    choice.pc = null
-}
-
-function nextRound(){
-    userChoice()
-    computerChoice()
-    comparation(choice)
-}
-
-function game(){
-    while (score.user < 5 && score.pc < 5){
-        nextRound()
-    }
-    if (score.user === 5) {
-        console.log("Congrats!! You Won!")
+function comparation({ user, pc }) {
+    if (user === pc) {
+        result.tie();
+    } else if (
+        (user === "R" && pc === "S") ||
+        (user === "S" && pc === "P") ||
+        (user === "P" && pc === "R")
+    ) {
+        result.playerWon();
     } else {
-        console.log("You lost!")
+        result.playerLost();
     }
+    choice.user = null;
+    choice.pc = null;
 }
 
-game()
+function scoreUpdate() {
+    userScore.textContent = `0${score.user}`;
+    pcScore.textContent = `0${score.pc}`;
+}
+
+function nextRound(userChoice) {
+    choice.user = userChoice;
+    computerChoice();
+    comparation(choice);
+    scoreUpdate();
+    if (score.user === 5 || score.pc === 5) {
+        setTimeout(() => {
+            alert(
+                `You ${score.user === 5 ? "Won" : "Lost"} the round! ${
+                    score.user === 5 ? "Congrats!" : "More luck next time..."
+                }`
+            );
+            score.user = 0;
+            score.pc = 0;
+            results[0].textContent = null;
+            results[2].textContent = "Make Your Choice!";
+            results[1].textContent = `Wanna try again?`;
+            scoreUpdate();
+        }, 100);
+    }
+}
